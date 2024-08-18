@@ -1,7 +1,7 @@
 deployments:
   - name: deployment-1
     flow_name: demo
-    entrypoint: flows/hello.py:my_flow
+    entrypoint: prefect_orchestration/hello.py:my_flow
     is_schedule_active: true
     paused: false
     schedules: []
@@ -21,12 +21,12 @@ deployments:
       work_queue_name: default
     pull_steps:
       - prefect.deployments.steps.git_clone:
-          repository: https://github.com/MartinsAlex/prefect-sandbox-flows.git
+          repository: https://github.com/MartinsAlex/prefect-dbt-sandbox.git
           branch: main
 
   - name: deployment-1
     flow_name: extract_load
-    entrypoint: flows/el.py:main
+    entrypoint: prefect_orchestration/el.py:main
     is_schedule_active: true
     paused: false
     schedules: []
@@ -41,11 +41,11 @@ deployments:
       work_queue_name: default
     pull_steps:
       - prefect.deployments.steps.git_clone:
-          repository: https://github.com/MartinsAlex/prefect-sandbox-flows.git
+          repository: https://github.com/MartinsAlex/prefect-dbt-sandbox.git
           branch: main
   - name: deployment-2
     flow_name: extract_load
-    entrypoint: flows/el.py:main
+    entrypoint: prefect_orchestration/el.py:main
     is_schedule_active: true
     paused: false
     schedules: []
@@ -60,12 +60,12 @@ deployments:
       work_queue_name: default
     pull_steps:
       - prefect.deployments.steps.git_clone:
-          repository: https://github.com/MartinsAlex/prefect-sandbox-flows.git
+          repository: https://github.com/MartinsAlex/prefect-dbt-sandbox.git
           branch: main
 
   - name: deployment-1
     flow_name: transformation
-    entrypoint: flows/t.py:main
+    entrypoint: prefect_orchestration/t.py:main
     is_schedule_active: true
     paused: false
     schedules: []
@@ -76,7 +76,7 @@ deployments:
       work_queue_name: default
     pull_steps:
       - prefect.deployments.steps.git_clone:
-          repository: https://github.com/MartinsAlex/prefect-sandbox-flows.git
+          repository: https://github.com/MartinsAlex/prefect-dbt-sandbox.git
           branch: main
     triggers:
       - type: event

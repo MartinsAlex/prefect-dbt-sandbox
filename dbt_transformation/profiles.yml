@@ -1,0 +1,12 @@
+dbt_master_project:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      user: dbt
+      pass: password
+      port: 5432
+      dbname: mydatabase
+      schema: public # You can set this to the schema you want to use
+      threads: 4

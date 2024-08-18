@@ -1,0 +1,17 @@
+name: Run transformation after extract load
+description: Run transformation after extract load
+trigger:
+  match:
+    "prefect.resource.id": "prefect.flow-run.extract_load*"
+  match_related: {}
+  after:
+    - "prefect.flow-run.Failed"
+  expect:
+    - "prefect.flow-run.transformation*"
+  for_each:
+    - "prefect.resource.id"
+  posture: "Proactive"
+  threshold: 1
+  within: 30
+actions:
+  - type: "create-flow-run"

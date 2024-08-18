@@ -1,0 +1,7 @@
+-e .
+dbt-postgres
+dbt-core
+prefect
+prefect_email
+pandas
+sqlalchemy

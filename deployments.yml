@@ -1,0 +1,87 @@
+deployments:
+  - name: deployment-1
+    flow_name: demo
+    entrypoint: flows/hello.py:my_flow
+    is_schedule_active: true
+    paused: false
+    schedules: []
+    description: abc
+    tags: ["test", "TAG2"]
+    parameters:
+      message: "Don't panic!"
+    #parameter_openapi_schema:
+    #  title: Parameter Schema
+    #  type: object
+    #  properties:
+    #    message:
+    #      type: string
+    #      default: "Don't panic!"
+    work_pool:
+      name: test
+      work_queue_name: default
+    pull_steps:
+      - prefect.deployments.steps.git_clone:
+          repository: https://github.com/MartinsAlex/prefect-sandbox-flows.git
+          branch: main
+
+  - name: deployment-1
+    flow_name: extract_load
+    entrypoint: flows/el.py:main
+    is_schedule_active: true
+    paused: false
+    schedules: []
+    description: My flo
+    tags: ["el"]
+    parameters:
+      source_db: dummy
+      target_db: dummy
+      thread: 4
+    work_pool:
+      name: test
+      work_queue_name: default
+    pull_steps:
+      - prefect.deployments.steps.git_clone:
+          repository: https://github.com/MartinsAlex/prefect-sandbox-flows.git
+          branch: main
+  - name: deployment-2
+    flow_name: extract_load
+    entrypoint: flows/el.py:main
+    is_schedule_active: true
+    paused: false
+    schedules: []
+    description: My flo
+    tags: ["el"]
+    parameters:
+      source_db: dummy
+      target_db: dummy
+      thread: 4
+    work_pool:
+      name: test
+      work_queue_name: default
+    pull_steps:
+      - prefect.deployments.steps.git_clone:
+          repository: https://github.com/MartinsAlex/prefect-sandbox-flows.git
+          branch: main
+
+  - name: deployment-1
+    flow_name: transformation
+    entrypoint: flows/t.py:main
+    is_schedule_active: true
+    paused: false
+    schedules: []
+    description: My flow 2
+    tags: ["t"]
+    work_pool:
+      name: test
+      work_queue_name: default
+    pull_steps:
+      - prefect.deployments.steps.git_clone:
+          repository: https://github.com/MartinsAlex/prefect-sandbox-flows.git
+          branch: main
+    triggers:
+      - type: event
+        enabled: true
+        match:
+          prefect.resource.id: prefect.flow-run.extract_load*
+        expect:
+          - prefect.flow-run.Completed

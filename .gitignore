@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+*.log
+*.sqlitedb
+*.db
+*.rdb
+
+# Prefect
+.prefect/
+
+# DBT
+/dbt_modules/
+/dbt_packages/
+/target/
+/logs/
+*.jinja
+
+# Virtual Environment
+venv/
+*.venv/
+*.virtualenvs/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+*.log*
+*.bak
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Other common files to ignore
+*.bak
+*.cache
+*.log
+*.tmp
+*.swp
+*.bak
+
+
+# DBT
+/logs/

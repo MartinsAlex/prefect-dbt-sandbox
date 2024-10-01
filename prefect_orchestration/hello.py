@@ -6,6 +6,6 @@ def dummy():
 
 
 @flow
-def main():
+def my_flow():
     for _ in range(1, 10):
         dummy.submit()

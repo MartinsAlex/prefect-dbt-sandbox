@@ -68,8 +68,7 @@ deployments:
       source_db: dummy
       target_db: dummy
       thread: 3
-    pull_steps:
-      *feature_1_branch
+
 
   - name: transformation_1
     flow_name: transformation
@@ -79,9 +78,4 @@ deployments:
     description: My flow 2
     tags: ["t"]
     pull_steps:
-      - prefect.deployments.steps.git_clone:
-          repository: https://github.com/MartinsAlex/prefect-dbt-sandbox.git
-          branch: main
-      - prefect.deployments.steps.git_clone:
-          repository: https://github.com/MartinsAlex/prefect-dbt-sandbox.git
-          branch: dev
+      *feature_1_branch

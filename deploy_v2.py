@@ -32,7 +32,8 @@ API_SIMPLE_AUTH_PASSWORD = "1234"
 HEADERS = {"Content-Type": "application/json", "Authorization": "Basic123"}
 DEFAULT_WORK_POOL_NAME = "default"
 DEFAULT_WORK_QUEUE_NAME = "default"
-PREFECT_INSTANCE_ENVIRONMENT = os.getenv("BRANCH", "prod")
+PREFECT_REPOSITORY_URL = os.getenv("PREFECT_REPOSITORY_URL", "https://github.com/MartinsAlex/prefect-dbt-sandbox.git")
+PREFECT_REPOSITORY_BRANCH = os.getenv("BRANCH", "main")
 DEFAULT_WORKER_IMAGE_NAME = "3.13.0-alpine3.20"
 
 
@@ -225,7 +226,7 @@ def normalize_deployment_for_comparison(deployment, flow_name=None):
         "tags": sorted(deployment.get("tags", [])),
         "work_pool_name": deployment.get("work_pool_name", DEFAULT_WORK_POOL_NAME),
         "work_queue_name": deployment.get("work_queue_name", DEFAULT_WORK_QUEUE_NAME),
-        "pull_steps": deployment.get("pull_steps", []),
+        "pull_steps": deployment.get("pull_steps", [{"prefect.deployments.steps.git_clone": {"repository": PREFECT_REPOSITORY_URL,"branch": PREFECT_REPOSITORY_BRANCH}}]),
         "schedules": schedules,
         "job_variables": deployment.get("job_variables", {"image": DEFAULT_WORKER_IMAGE_NAME})
     }
@@ -386,7 +387,7 @@ def delete_flow(flow_id, flow_name):
 
 
 if __name__ == "__main__":
-    
+
     yaml_file_path = "deployments.yml"
 
     synchronize_deployments(yaml_file_path)

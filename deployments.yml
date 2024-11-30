@@ -14,7 +14,7 @@ definitions:
   pull_steps:
     feature_1: &feature_1_branch
       - prefect.deployments.steps.git_clone:
-          repository: https://github.com/MartinsAlex/prefect-dbt-sandbox.git
+          repository: https://github.com/MartinsAlex/prefect-dbt-sandbox
           branch: feature_1
 
 
@@ -36,8 +36,11 @@ deployments:
     job_variables:
       image: *python3_13
       env: { "EXTRA_PIP_PACKAGES": "pandas==2.1.1", "EXECUTION_ENV": "ctlq", "MY_NOT_SO_SECRET_CONFIG": "{{ prefect.variables.variable_name }}" }
-
-
+    pull_steps:
+      - prefect.deployments.steps.git_clone:
+          repository: https://github.com/MartinsAlex/prefect-dbt-sandbox.git
+          branch: main
+          
   - name: demo_3
     flow_name: demo3
     entrypoint: prefect_orchestration/el.py:main

@@ -22,7 +22,8 @@ deployments:
   - name: demo
     flow_name: demo
     entrypoint: prefect_orchestration/hello.py:my_flow
-    parameters: {"message": "{{ prefect.variables.variable_name }}"}
+    parameters:
+      message: "Hello World!"
     schedules:
       - *every_10_minutes
       - cron: "0 12 * * *"
@@ -40,7 +41,7 @@ deployments:
       - prefect.deployments.steps.git_clone:
           repository: https://github.com/MartinsAlex/prefect-dbt-sandbox.git
           branch: main
-          
+
   - name: demo_3
     flow_name: demo3
     entrypoint: prefect_orchestration/el.py:main

@@ -3,7 +3,7 @@ import yaml
 import json
 import logging
 import sys
-
+import os
 
 #TODO: add default pull step based on instance + branch
 
@@ -32,7 +32,8 @@ API_SIMPLE_AUTH_PASSWORD = "1234"
 HEADERS = {"Content-Type": "application/json", "Authorization": "Basic123"}
 DEFAULT_WORK_POOL_NAME = "default"
 DEFAULT_WORK_QUEUE_NAME = "default"
-
+PREFECT_INSTANCE_ENVIRONMENT = os.getenv("BRANCH", "prod")
+DEFAULT_WORKER_IMAGE_NAME = "3.13.0-alpine3.20"
 
 
 def load_yaml(file_path):
@@ -226,7 +227,7 @@ def normalize_deployment_for_comparison(deployment, flow_name=None):
         "work_queue_name": deployment.get("work_queue_name", DEFAULT_WORK_QUEUE_NAME),
         "pull_steps": deployment.get("pull_steps", []),
         "schedules": schedules,
-        "job_variables": deployment.get("job_variables", {})
+        "job_variables": deployment.get("job_variables", {"image": DEFAULT_WORKER_IMAGE_NAME})
     }
 
 
@@ -385,6 +386,7 @@ def delete_flow(flow_id, flow_name):
 
 
 if __name__ == "__main__":
+    
     yaml_file_path = "deployments.yml"
 
     synchronize_deployments(yaml_file_path)

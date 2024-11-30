@@ -21,7 +21,7 @@ def wrapper(thread: int, source_db: str, target_db: str, **kwargs):
     logger.info(source_db)
     logger.info(target_db)
     data = extract()
-    load(data)
+    load.submit(data)
 
 @flow(flow_run_name="extract_load_{target_db}")
 def main(thread: int, source_db: str, target_db: str, **kwargs):

@@ -1,17 +1,33 @@
-name: Run transformation after extract load
-description: Run transformation after extract load
-trigger:
-  match:
-    "prefect.resource.id": "prefect.flow-run.extract_load*"
-  match_related: {}
-  after:
-    - "prefect.flow-run.Failed"
-  expect:
-    - "prefect.flow-run.transformation*"
-  for_each:
-    - "prefect.resource.id"
-  posture: "Proactive"
-  threshold: 1
-  within: 30
-actions:
-  - type: "create-flow-run"
+automations:
+  #- name: "T after EL"
+  #  trigger:
+  #    type: "event"
+  #    match: 
+  #      prefect.resource.id:
+  #        - "prefect.flow-run.*"
+  #    match_related: "prefect.deployment.e78f8b43-feb1-49ce-a37b-8a3a40b7ae09"
+  #    after: []
+  #    expect:
+  #      - "prefect.flow-run.Completed"
+  #    for_each: []
+  #    posture: "Reactive"
+  #    threshold: 1
+  #    within: 0
+  #  actions:
+  #    - type: "run-deployment"
+
+
+  - name: T after EL
+    trigger:
+      match:
+        "prefect.resource.id": "prefect.flow-run.*"
+      match_related:
+        "prefect.resource.id": "prefect.deployment.e78f8b43-feb1-49ce-a37b-8a3a40b7ae09"
+      after:
+        - "prefect.flow-run.Completed"
+      posture: "Proactive"
+      threshold: 1
+      within: 30
+    actions:
+      - type: "run-deployment"
+        deployment_id: "4b2b2d29-1892-47ba-ab12-7c2f31bb5bb7"  # Add the required deployment ID

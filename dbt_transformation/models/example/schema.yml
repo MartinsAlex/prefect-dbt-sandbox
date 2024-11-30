@@ -1,12 +1,75 @@
 
 version: 2
 
+sources:
+  - name: public
+    tables: 
+    - name: src_dbt_run_logs
+      description: >
+          All dbt logs from model run and tests
+      columns:
+        - name: resource_type
+          tests:
+            - accepted_values:
+                values:
+                  - 'test2'
+                  #- 'model'
+                config:
+                  store_failures: true
+                  store_failures_as: table
+    
+    - name: customers  # Table name in the database
+      description: "Contains information about customers, including their names and contact details."
+      columns:
+        - name: customer_id
+          description: "Primary key of the customer table."
+        - name: first_name
+          description: "First name of the customer."
+        - name: last_name
+          description: "Last name of the customer."
+        - name: email
+          description: "Email address of the customer."
+        - name: country
+          description: "Country where the customer resides."
+        
+    - name: products   # Another table in the database
+      description: "Contains information about products available for sale."
+      columns:
+        - name: product_id
+          description: "Primary key of the product table."
+        - name: product_name
+          description: "Name of the product."
+        - name: category
+          description: "Category of the product."
+        - name: price
+          description: "Price of the product."
+
+    - name: orders     # Another table in the database
+      description: "Contains information about orders placed by customers."
+      columns:
+        - name: order_id
+          description: "Primary key of the orders table."
+        - name: customer_id
+          description: "ID of the customer who placed the order."
+        - name: product_id
+          description: "ID of the product ordered."
+        - name: order_date
+          description: "Date when the order was placed."
+        - name: quantity
+          description: "Quantity of the product ordered."
+        - name: total_price
+          description: "Total price for the order."
+
+
 models:
-  - name: my_first_dbt_model
-    #description: "A starter dbt model"
-    #columns:
-    #  - name: id
-    #    description: "The primary key for this table"
-    #    data_tests:
-    #      - unique
-    #      - not_null
+  - name: VIZ_ALL_ORDERS
+    columns:
+      - name: product_id
+        data_tests:
+          - is_above_value:
+              name: product_id_is_above_20
+              value: 20
+              store_failures: true
+              store_failures_as: table
+
+

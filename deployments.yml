@@ -1,87 +1,83 @@
+definitions:
+  schedules:
+    every_ten_minutes: &every_10_minutes
+      interval: 600 # 10 minutes in seconds
+    every_hour: &every_1h
+      interval: 3600 # 1 hour in seconds
+
+  images:
+    python3_11_alpine: &python3_11
+      image: "3.11.10-alpine3.19"
+    python3_13_alpine: &python3_13
+      "3.13.0-alpine3.20"
+
+  pull_steps:
+    feature_1: &feature_1_branch
+      - prefect.deployments.steps.git_clone:
+          repository: https://github.com/MartinsAlex/prefect-dbt-sandbox.git
+          branch: feature_1
+
+
 deployments:
-  - name: deployment-1
+  - name: demo
     flow_name: demo
     entrypoint: prefect_orchestration/hello.py:my_flow
-    is_schedule_active: true
-    paused: false
-    schedules: []
+    parameters: {"message": "{{ prefect.variables.variable_name }}"}
+    schedules:
+      - *every_10_minutes
+      - cron: "0 12 * * *"
+        timezone: "America/New_York"
+        active: true
+      - cron: "0 18 * * *"
+        timezone: "America/New_York"
+        active: true
     description: abc
-    tags: ["test", "TAG2"]
+    tags: ["default", "TAG1", "TAG2"]
+    job_variables:
+      image: *python3_13
+      env: { "EXTRA_PIP_PACKAGES": "pandas==2.1.1", "EXECUTION_ENV": "ctlq", "MY_NOT_SO_SECRET_CONFIG": "{{ prefect.variables.variable_name }}" }
+
+
+  - name: demo_3
+    flow_name: demo3
+    entrypoint: prefect_orchestration/el.py:main
+    is_schedule_active: true
+    schedule: *every_10_minutes # Using the alias defined above
+    description: My flow
+    tags: ["el", "test"]
     parameters:
-      message: "Don't panic!"
-    #parameter_openapi_schema:
-    #  title: Parameter Schema
-    #  type: object
-    #  properties:
-    #    message:
-    #      type: string
-    #      default: "Don't panic!"
-    work_pool:
-      name: test
-      work_queue_name: default
+      source_db: [1, 2, 3, 4]
+      target_db: { "dummy": "target" }
+      thread: 45
     pull_steps:
       - prefect.deployments.steps.git_clone:
           repository: https://github.com/MartinsAlex/prefect-dbt-sandbox.git
           branch: main
 
-  - name: deployment-1
+  - name: extract_load_2
     flow_name: extract_load
     entrypoint: prefect_orchestration/el.py:main
-    is_schedule_active: true
-    paused: false
     schedules: []
     description: My flo
     tags: ["el"]
     parameters:
       source_db: dummy
       target_db: dummy
-      thread: 4
-    work_pool:
-      name: test
-      work_queue_name: default
+      thread: 3
     pull_steps:
-      - prefect.deployments.steps.git_clone:
-          repository: https://github.com/MartinsAlex/prefect-dbt-sandbox.git
-          branch: main
-  - name: deployment-2
-    flow_name: extract_load
-    entrypoint: prefect_orchestration/el.py:main
-    is_schedule_active: true
-    paused: false
-    schedules: []
-    description: My flo
-    tags: ["el"]
-    parameters:
-      source_db: dummy
-      target_db: dummy
-      thread: 4
-    work_pool:
-      name: test
-      work_queue_name: default
-    pull_steps:
-      - prefect.deployments.steps.git_clone:
-          repository: https://github.com/MartinsAlex/prefect-dbt-sandbox.git
-          branch: main
+      *feature_1_branch
 
-  - name: deployment-1
+  - name: transformation_1
     flow_name: transformation
     entrypoint: prefect_orchestration/t.py:main
-    is_schedule_active: true
-    paused: false
+    #is_schedule_active: true
     schedules: []
     description: My flow 2
     tags: ["t"]
-    work_pool:
-      name: test
-      work_queue_name: default
     pull_steps:
       - prefect.deployments.steps.git_clone:
           repository: https://github.com/MartinsAlex/prefect-dbt-sandbox.git
           branch: main
-    triggers:
-      - type: event
-        enabled: true
-        match:
-          prefect.resource.id: prefect.flow-run.extract_load*
-        expect:
-          - prefect.flow-run.Completed
+      - prefect.deployments.steps.git_clone:
+          repository: https://github.com/MartinsAlex/prefect-dbt-sandbox.git
+          branch: dev

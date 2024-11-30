@@ -67,7 +67,7 @@ async def main():
 
             if flow_name not in server_flows:
                 # Create flow
-                print(f"Flow '{flow_name}' not found on server. Creating it.")
+                print(f"Flow '{flow_name}' not found on server. Creating it..")
                 flow = await client.create_flow_from_name(flow_name=flow_name)
                 flow_id = str(flow)
             else:
@@ -106,28 +106,33 @@ async def main():
                     if key in server_deployment_representation
                 }
 
-                yaml_deployment_representation.pop('flow_id')
-                yaml_deployment_representation.pop('name')
-                yaml_deployment_representation.pop('pull_steps')
+                print(server_deployment_representation)
+                print(yaml_deployment_representation)
 
-                yaml_deployment_representation["job_variables"] = {}
-                yaml_deployment_representation['enforce_parameter_schema'] = True
+                #yaml_deployment_representation.pop('flow_id')
+                #yaml_deployment_representation.pop('name')
+                #yaml_deployment_representation.pop('pull_steps')
+
+                #yaml_deployment_representation["job_variables"] = {}
+                #yaml_deployment_representation['enforce_parameter_schema'] = True
 
                 # If flow_id differs, we need to create a new deployment since the PATCH method can not receive a flow_id (or name)
 
-                headers = {"Content-Type": "application/json", "accept": "*/*"}
+                #headers = {"Content-Type": "application/json", "accept": "*/*"}
 
-                # PATCH method
-                print(
-                    f"PATCH 'https://127.0.0.1:4200/api/deployments/{server_deployment_id}' with data:\n{json.dumps(yaml_deployment_representation, indent=4)}"
-                )
+                ## PATCH method
+                #print(
+                #    f"PATCH 'https://127.0.0.1:4200/api/deployments/{server_deployment_id}' with data:\n{json.dumps(yaml_deployment_representation, indent=4)}"
+                #)
 
-                r = requests.patch(
-                    f"http://127.0.0.1:4200/api/deployments/{server_deployment_id}",
-                    data=json.dumps(yaml_deployment_representation),
-                    headers=headers,
-                )
-                print(f"\nRESPONSE:\n{json.dumps(r.json(), indent=4)}")
+                #r = requests.patch(
+                #    f"http://127.0.0.1:4200/api/deployments/{server_deployment_id}",
+                #    data=json.dumps(yaml_deployment_representation),
+                #    headers=headers,
+                #)
+                #
+                #if r.status_code != 204:
+                #    print(f"\nRESPONSE:\n{json.dumps(r.json(), indent=4)}")
 
             else:
                 await client.create_deployment(**yaml_deployment_representation)

@@ -4,8 +4,14 @@ import json
 import logging
 import sys
 import os
+from requests.auth import HTTPBasicAuth
 
-#TODO: add default pull step based on instance + branch
+# TODO: TEST IN LOCAL (add oauth2 token) FIRST!
+
+# TODO: before deleting a flow, verify that it has no flow run running. Because subflows generate flow objects.
+# However, the issue is that deleting old subflows will also delete all sbuflow run/logs
+# Leaving users the ability to clean flows from the UI might be the best option?
+# TODO: Uncomment "credentials"
 
 # Configure logging
 logging.basicConfig(
@@ -29,7 +35,7 @@ else:
 API_BASE_URL = "http://127.0.0.1:4200/api"
 API_SIMPLE_AUTH_USER = "prefect-analytics"
 API_SIMPLE_AUTH_PASSWORD = "1234"
-HEADERS = {"Content-Type": "application/json", "Authorization": "Basic123"}
+HEADERS = {"Content-Type": "application/json"}
 DEFAULT_WORK_POOL_NAME = "default"
 DEFAULT_WORK_QUEUE_NAME = "default"
 PREFECT_REPOSITORY_URL = os.getenv("PREFECT_REPOSITORY_URL", "https://github.com/MartinsAlex/prefect-dbt-sandbox.git")
@@ -50,7 +56,7 @@ def load_yaml(file_path):
 def get_all_flows():
     """Retrieve all flows from the server."""
     url = f"{API_BASE_URL}/flows/filter"
-    response = requests.post(url, headers=HEADERS, json={})
+    response = requests.post(url, headers=HEADERS, json={}, auth=HTTPBasicAuth(API_SIMPLE_AUTH_USER, API_SIMPLE_AUTH_PASSWORD))
     response.raise_for_status()
     flows = response.json()
     logger.debug(f"Retrieved flows: {flows}")
@@ -60,7 +66,7 @@ def get_all_flows():
 def get_all_deployments():
     """Retrieve all deployments from the server."""
     url = f"{API_BASE_URL}/deployments/filter"
-    response = requests.post(url, headers=HEADERS, json={})
+    response = requests.post(url, headers=HEADERS, json={}, auth=HTTPBasicAuth(API_SIMPLE_AUTH_USER, API_SIMPLE_AUTH_PASSWORD))
     response.raise_for_status()
     deployments = response.json()
     logger.debug(f"Retrieved deployments: {json.dumps(deployments, indent=4)}")
@@ -71,7 +77,7 @@ def create_or_update_flow(flow_name):
     """Ensure a flow exists on the server."""
     url = f"{API_BASE_URL}/flows/"
     logger.info(f"Creating or ensuring existence of flow: {flow_name}")
-    response = requests.post(url, headers=HEADERS, json={"name": flow_name})
+    response = requests.post(url, headers=HEADERS, json={"name": flow_name}, auth=HTTPBasicAuth(API_SIMPLE_AUTH_USER, API_SIMPLE_AUTH_PASSWORD))
     response.raise_for_status()
     flow_id = response.json()["id"]
     logger.debug(f"Flow '{flow_name}' created or retrieved with ID: {flow_id}")
@@ -83,7 +89,7 @@ def get_flow_name_by_id(flow_id):
     Retrieve the flow name using its ID.
     """
     url = f"{API_BASE_URL}/flows/{flow_id}"
-    response = requests.get(url, headers=HEADERS)
+    response = requests.get(url, headers=HEADERS, auth=HTTPBasicAuth(API_SIMPLE_AUTH_USER, API_SIMPLE_AUTH_PASSWORD))
     response.raise_for_status()
     flow_data = response.json()
     return flow_data["name"]
@@ -226,9 +232,22 @@ def normalize_deployment_for_comparison(deployment, flow_name=None):
         "tags": sorted(deployment.get("tags", [])),
         "work_pool_name": deployment.get("work_pool_name", DEFAULT_WORK_POOL_NAME),
         "work_queue_name": deployment.get("work_queue_name", DEFAULT_WORK_QUEUE_NAME),
-        "pull_steps": deployment.get("pull_steps", [{"prefect.deployments.steps.git_clone": {"repository": PREFECT_REPOSITORY_URL,"branch": PREFECT_REPOSITORY_BRANCH}}]),
+        "pull_steps": deployment.get(
+            "pull_steps",
+            [
+                {
+                    "prefect.deployments.steps.git_clone": {
+                        "repository": PREFECT_REPOSITORY_URL,
+                        "branch": PREFECT_REPOSITORY_BRANCH,
+                        #"credentials": "{{ prefect.blocks.bitbucket-credentials.my-bitbucket-credentials-block}}"
+                    }
+                }
+            ],
+        ),
         "schedules": schedules,
-        "job_variables": deployment.get("job_variables", {"image": DEFAULT_WORKER_IMAGE_NAME})
+        "job_variables": deployment.get(
+            "job_variables", {"image": DEFAULT_WORKER_IMAGE_NAME}
+        ),
     }
 
 
@@ -276,7 +295,7 @@ def create_or_update_deployment(normalized_deployment, flow_id):
 
         url = f"{API_BASE_URL}/deployments/"
 
-        response = requests.post(url, headers=HEADERS, json=normalized_deployment)
+        response = requests.post(url, headers=HEADERS, json=normalized_deployment, auth=HTTPBasicAuth(API_SIMPLE_AUTH_USER, API_SIMPLE_AUTH_PASSWORD))
 
         if response.status_code == 422:
             logger.error("Validation error when creating/updating deployment.")
@@ -302,7 +321,7 @@ def delete_deployment(deployment_id, deployment_name):
     """Delete a deployment."""
     url = f"{API_BASE_URL}/deployments/{deployment_id}"
     logger.info(f"Deleting deployment '{deployment_name}' with ID: {deployment_id}")
-    response = requests.delete(url, headers=HEADERS)
+    response = requests.delete(url, headers=HEADERS, auth=HTTPBasicAuth(API_SIMPLE_AUTH_USER, API_SIMPLE_AUTH_PASSWORD))
     response.raise_for_status()
     logger.debug(f"Deployment '{deployment_name}' deleted successfully.")
 
@@ -376,7 +395,7 @@ def delete_flow(flow_id, flow_name):
     """Delete a flow."""
     url = f"{API_BASE_URL}/flows/{flow_id}"
     logger.info(f"Deleting flow '{flow_name}' with ID: {flow_id}")
-    response = requests.delete(url, headers=HEADERS)
+    response = requests.delete(url, headers=HEADERS, auth=HTTPBasicAuth(API_SIMPLE_AUTH_USER, API_SIMPLE_AUTH_PASSWORD))
     if response.status_code == 404:
         logger.warning(
             f"Flow '{flow_name}' not found on the server. It may have been already deleted."

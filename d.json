@@ -1,8 +1,0 @@
-{
-    "active": True,
-    "schedule": {
-        "interval": 500,
-        "timezone": "Europe/Zurich"
-    },
-    "catchup": False
-}

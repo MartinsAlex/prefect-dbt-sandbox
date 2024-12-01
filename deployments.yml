@@ -36,7 +36,7 @@ deployments:
     tags: ["default", "TAG1", "TAG2"]
     job_variables:
       image: *python3_13
-      env: { "EXTRA_PIP_PACKAGES": "pandas==2.1.1", "EXECUTION_ENV": "ctlq", "MY_NOT_SO_SECRET_CONFIG": "{{ prefect.variables.variable_name }}" }
+      env: { "EXTRA_PIP_PACKAGES": "pandas==2.1.1", "EXECUTION_ENV": "ctlq", "MY_NOT_SO_SECRET_CONFIG": "TRUE" }
     pull_steps:
       - prefect.deployments.steps.git_clone:
           repository: https://github.com/MartinsAlex/prefect-dbt-sandbox.git
